@@ -27,19 +27,20 @@ func Ping(str string) (float64, error) {
 	// Run the ping command
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Println("Error executing ping command:", err)
+		fmt.Println("Output:", string(output))
 		return -1, err
 	}
 
 	// Convert the output bytes to string
 	pingOutput := string(output)
+	//	fmt.Println("Ping output:", pingOutput)
 
 	// Extract RTT from ping output
 	rtt := extractRTT(pingOutput)
 	if rtt == -1 {
-		return -1.00, fmt.Errorf("RTT not found in ping output")
+		return -1, fmt.Errorf("RTT not found in ping output")
 	}
 
 	return rtt, nil
-
 }

@@ -1,0 +1,29 @@
+<!-- form.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Latency Checker</title>
+    <!-- Link Bootstrap CSS -->
+    <link rel="stylesheet" href="../static/css/styles.css">
+ 
+    <!-- Link your custom CSS -->
+</head>
+<body>
+    <div class="container">
+        <h1>Ping Latency Checker</h1>
+        <form method="POST" action="/">
+            <div class="form-group">
+                <label for="domain">Enter Domain Name:</label>
+                <input type="text" class="form-control" id="domain" name="domain" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+    <!-- Link Bootstrap JS -->
+    <script src="/static/libs/bootstrap/js/bootstrap.min.js"></script>
+    <!-- Link your custom JS -->
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
