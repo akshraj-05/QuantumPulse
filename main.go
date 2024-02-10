@@ -2,50 +2,62 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"latency/ping"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-func helloHandler(w http.ResponseWriter, r *http.Request) {
-	// If the request method is GET, display the form
-	if r.Method == "GET" {
-		// Display the HTML form
-		fmt.Fprintf(w, `
-            <html>
-            <body>
-                <form method="POST" action="/">
-                    <label for="">Enter Domain name:</label><br>
-                    <input type="text" id="domain" name="domain"><br>
-                    <input type="submit" value="Submit">
-                </form>
-            </body>
-            </html>
-        `)
-		return
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	// If the request method is GET, render the HTML template
+	if r.Method == http.MethodGet {
+		tmpl, err := template.ParseFiles("templates/form.html")
+		if err != nil {
+			http.Error(w, "Failed to parse HTML template", http.StatusInternalServerError)
+			return
+		}
+		if err := tmpl.Execute(w, nil); err != nil {
+			http.Error(w, "Failed to render HTML template", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// If the request method is POST, process the form data
-	if r.Method == "POST" {
+	if r.Method == http.MethodPost {
 		// Parse the form data
-		r.ParseForm()
-		domain1 := r.Form.Get("domain")
-
-		domain, err := ping.Ping(string(domain1))
-		if err == nil {
-			fmt.Fprintln(w, "This is the latency", domain, "ms")
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "Failed to parse form data", http.StatusInternalServerError)
+			return
 		}
+
+		// Retrieve the value of the "domain" field
+		domain := r.Form.Get("domain")
+
+		lat, err := ping.Ping(domain)
+		if err != nil {
+			http.Error(w, "Failed to ping domain", http.StatusInternalServerError)
+			return
+		}
+		// Use the value of "domain" as needed
+		fmt.Fprintf(w, "Latency of domain %s is : %v", domain, lat)
 	}
 }
 
 func main() {
 	r := mux.NewRouter()
 
-	// Define route for "/" path
-	r.HandleFunc("/", helloHandler)
+	// Serve static files (CSS, JS, etc.)
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	// Start the server
+	// Define route for root path ("/")
+	r.HandleFunc("/", indexHandler)
+
+	// Start HTTP server
 	fmt.Println("Server listening on port 80")
-	http.ListenAndServe(":80", r)
+	if err := http.ListenAndServe(":80", r); err != nil {
+		fmt.Printf("Failed to start server: %v\n", err)
+	}
 }
